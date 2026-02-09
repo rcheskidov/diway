@@ -5,7 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Sparkles, ShieldAlert, Layers, Route, Gauge, Building2, ClipboardCheck, FileText, Camera, Cpu, Coins, Users, Wrench, MessageSquareText } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  ShieldAlert,
+  Layers,
+  Route,
+  Gauge,
+  Building2,
+  ClipboardCheck,
+  FileText,
+  Cpu,
+  Coins,
+  Users,
+  Wrench,
+  MessageSquareText,
+} from "lucide-react";
 
 /**
  * One-file interactive site-deck for Miro/Pitch use.
@@ -18,14 +34,14 @@ import { ChevronLeft, ChevronRight, Sparkles, ShieldAlert, Layers, Route, Gauge,
  * Customize texts in SLIDES below.
  */
 
-const Pill = ({ icon: Icon, label }: { icon?: any; label: string }) => (
+const Pill = ({ icon: Icon, label }) => (
   <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
     {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
     {label}
   </span>
 );
 
-const SlideShell = ({ title, subtitle, children }: any) => (
+const SlideShell = ({ title, subtitle, children }) => (
   <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6">
     <div className="mb-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -39,7 +55,7 @@ const SlideShell = ({ title, subtitle, children }: any) => (
   </div>
 );
 
-function KPI({ label, value, delta, tone }: { label: string; value: string; delta?: string; tone?: "ok" | "warn" | "bad" }) {
+function KPI({ label, value, delta, tone }) {
   const badge = tone === "ok" ? "secondary" : tone === "warn" ? "outline" : "destructive";
   return (
     <Card className="rounded-2xl">
@@ -49,14 +65,18 @@ function KPI({ label, value, delta, tone }: { label: string; value: string; delt
             <div className="text-sm text-muted-foreground">{label}</div>
             <div className="mt-1 text-2xl font-semibold">{value}</div>
           </div>
-          {delta ? <Badge variant={badge as any} className="h-fit">{delta}</Badge> : null}
+          {delta ? (
+            <Badge variant={badge} className="h-fit">
+              {delta}
+            </Badge>
+          ) : null}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-const AgentCard = ({ icon: Icon, name, question, tags, onOpen }: any) => (
+const AgentCard = ({ icon: Icon, name, question, tags, onOpen }) => (
   <Card className="group rounded-2xl">
     <CardContent className="p-5">
       <div className="flex items-start justify-between gap-3">
@@ -74,30 +94,42 @@ const AgentCard = ({ icon: Icon, name, question, tags, onOpen }: any) => (
         </Button>
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        {(tags || []).map((t: any, i: number) => (
-          <Badge key={i} variant="secondary">{t}</Badge>
+        {(tags || []).map((tag, index) => (
+          <Badge key={index} variant="secondary">
+            {tag}
+          </Badge>
         ))}
       </div>
     </CardContent>
   </Card>
 );
 
-const RoadmapStep = ({ step, title, duration, price, what, data }: any) => (
+const RoadmapStep = ({ step, title, duration, price, what, data }) => (
   <Card className="rounded-2xl">
     <CardHeader className="pb-2">
       <CardTitle className="flex items-center justify-between">
-        <span className="text-base">Этап {step}. {title}</span>
-        <Badge variant="outline">{duration} • {price}</Badge>
+        <span className="text-base">
+          Этап {step}. {title}
+        </span>
+        <Badge variant="outline">
+          {duration} • {price}
+        </Badge>
       </CardTitle>
     </CardHeader>
     <CardContent className="space-y-3">
       <div className="text-sm text-muted-foreground">Что делаем</div>
       <ul className="list-disc space-y-1 pl-5 text-sm">
-        {what.map((x: string, i: number) => <li key={i}>{x}</li>)}
+        {what.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
       </ul>
       <div className="text-sm text-muted-foreground">Данные</div>
       <div className="flex flex-wrap gap-2">
-        {data.map((x: string, i: number) => <Badge key={i} variant="secondary">{x}</Badge>)}
+        {data.map((item, index) => (
+          <Badge key={index} variant="secondary">
+            {item}
+          </Badge>
+        ))}
       </div>
     </CardContent>
   </Card>
@@ -168,8 +200,12 @@ const SLIDES = [
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <div className="text-sm text-muted-foreground">Development Health Index</div>
-                  <div className="mt-1 text-3xl font-semibold">72 / 100 <span className="text-base text-muted-foreground">🟡</span></div>
-                  <div className="mt-2 text-sm text-muted-foreground">Не финпоказатель. Управленческий индикатор зрелости исполнения и рисков.</div>
+                  <div className="mt-1 text-3xl font-semibold">
+                    72 / 100 <span className="text-base text-muted-foreground">🟡</span>
+                  </div>
+                  <div className="mt-2 text-sm text-muted-foreground">
+                    Не финпоказатель. Управленческий индикатор зрелости исполнения и рисков.
+                  </div>
                 </div>
                 <div className="w-56">
                   <Progress value={72} />
@@ -216,7 +252,9 @@ const SLIDES = [
 
         <Card className="rounded-2xl">
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2"><MessageSquareText className="h-4 w-4"/> AI-объяснение</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageSquareText className="h-4 w-4" /> AI-объяснение
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="rounded-xl border p-3">
@@ -258,7 +296,9 @@ const SLIDES = [
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="rounded-2xl">
           <CardContent className="p-6 space-y-3">
-            <div className="flex items-center gap-2 font-semibold"><Layers className="h-4 w-4"/> Системы и цифровизация</div>
+            <div className="flex items-center gap-2 font-semibold">
+              <Layers className="h-4 w-4" /> Системы и цифровизация
+            </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">1С/ERP</Badge>
               <Badge variant="secondary">CRM</Badge>
@@ -275,7 +315,9 @@ const SLIDES = [
         </Card>
         <Card className="rounded-2xl">
           <CardContent className="p-6 space-y-3">
-            <div className="flex items-center gap-2 font-semibold"><ClipboardCheck className="h-4 w-4"/> Процессы и дисциплина</div>
+            <div className="flex items-center gap-2 font-semibold">
+              <ClipboardCheck className="h-4 w-4" /> Процессы и дисциплина
+            </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary">Регулярная фиксация факта</Badge>
               <Badge variant="secondary">Отчётность подрядчиков</Badge>
@@ -293,7 +335,9 @@ const SLIDES = [
           <CardContent className="p-6">
             <div className="text-sm text-muted-foreground">Вывод</div>
             <div className="mt-1 text-lg font-semibold">Не «волшебная кнопка», а реалистичный путь к управляемости</div>
-            <div className="mt-2 text-sm text-muted-foreground">Поэтому внедрение — по этапам: сначала польза без интеграций, затем контекст проекта, затем факт, затем управленческий cockpit.</div>
+            <div className="mt-2 text-sm text-muted-foreground">
+              Поэтому внедрение — по этапам: сначала польза без интеграций, затем контекст проекта, затем факт, затем управленческий cockpit.
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -362,7 +406,9 @@ const SLIDES = [
               </div>
               <div className="rounded-xl border p-4">
                 <div className="font-semibold">ИИ</div>
-                <div className="mt-1 text-sm text-muted-foreground">Типовые зоны переплаты: объёмы «с запасом», отсутствие альтернативных поставщиков, непрозрачная логистика. Даю рыночные диапазоны и чек‑лист проверки.</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  Типовые зоны переплаты: объёмы «с запасом», отсутствие альтернативных поставщиков, непрозрачная логистика. Даю рыночные диапазоны и чек‑лист проверки.
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -373,11 +419,15 @@ const SLIDES = [
               <div className="text-sm text-muted-foreground">Роль: Стройка / Финансы</div>
               <div className="rounded-xl border p-4">
                 <div className="font-semibold">Пользователь</div>
-                <div className="mt-1 text-sm text-muted-foreground">Покажи риски по подрядчику «МонолитСтрой» на ЖК «Северный». Есть ли проблемы в КС?</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  Покажи риски по подрядчику «МонолитСтрой» на ЖК «Северный». Есть ли проблемы в КС?
+                </div>
               </div>
               <div className="rounded-xl border p-4">
                 <div className="font-semibold">ИИ</div>
-                <div className="mt-1 text-sm text-muted-foreground">В договоре №14 и ТЗ есть неоднозначность по границам объёмов. В последних КС (из 1С) есть позиции без чёткой привязки к ТЗ → риск допработ/спора. Рекомендую уточнить формулировки до оплаты.</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  В договоре №14 и ТЗ есть неоднозначность по границам объёмов. В последних КС (из 1С) есть позиции без чёткой привязки к ТЗ → риск допработ/спора. Рекомендую уточнить формулировки до оплаты.
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -388,7 +438,7 @@ const SLIDES = [
 ];
 
 function AgentsSlide() {
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState(null);
   const agents = useMemo(
     () => [
       {
@@ -467,24 +517,24 @@ function AgentsSlide() {
     []
   );
 
-  const current = agents.find((a) => a.id === open);
+  const current = agents.find((agent) => agent.id === open);
 
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2">
-        {agents.map((a) => (
+        {agents.map((agent) => (
           <AgentCard
-            key={a.id}
-            icon={a.icon}
-            name={a.name}
-            question={a.question}
-            tags={a.tags}
-            onOpen={() => setOpen(a.id)}
+            key={agent.id}
+            icon={agent.icon}
+            name={agent.name}
+            question={agent.question}
+            tags={agent.tags}
+            onOpen={() => setOpen(agent.id)}
           />
         ))}
       </div>
 
-      <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
+      <Dialog open={Boolean(open)} onOpenChange={(value) => !value && setOpen(null)}>
         <DialogContent className="sm:max-w-[640px] rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -494,8 +544,10 @@ function AgentsSlide() {
             <DialogDescription>{current?.question}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 text-sm">
-            {(current?.details || []).map((x: string, i: number) => (
-              <div key={i} className="rounded-xl border p-3 text-muted-foreground">{x}</div>
+            {(current?.details || []).map((detail, index) => (
+              <div key={index} className="rounded-xl border p-3 text-muted-foreground">
+                {detail}
+              </div>
             ))}
           </div>
         </DialogContent>
@@ -508,14 +560,16 @@ export default function SiteDeck() {
   const [idx, setIdx] = useState(0);
   const slide = SLIDES[idx];
 
-  const go = (n: number) => setIdx((p) => Math.min(Math.max(n, 0), SLIDES.length - 1));
+  const go = (nextIndex) => setIdx((prev) => Math.min(Math.max(nextIndex, 0), SLIDES.length - 1));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="rounded-xl border p-2"><Cpu className="h-4 w-4" /></div>
+            <div className="rounded-xl border p-2">
+              <Cpu className="h-4 w-4" />
+            </div>
             <div>
               <div className="text-sm font-semibold leading-none">AI Product Strategist</div>
               <div className="text-xs text-muted-foreground">Interactive pitch deck</div>
@@ -523,20 +577,22 @@ export default function SiteDeck() {
           </div>
 
           <div className="hidden gap-2 md:flex">
-            {SLIDES.map((s, i) => (
+            {SLIDES.map((item, index) => (
               <Button
-                key={s.id}
-                variant={i === idx ? "secondary" : "ghost"}
+                key={item.id}
+                variant={index === idx ? "secondary" : "ghost"}
                 size="sm"
-                onClick={() => go(i)}
+                onClick={() => go(index)}
               >
-                {s.nav}
+                {item.nav}
               </Button>
             ))}
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge variant="outline">{idx + 1} / {SLIDES.length}</Badge>
+            <Badge variant="outline">
+              {idx + 1} / {SLIDES.length}
+            </Badge>
             <Button variant="outline" size="icon" onClick={() => go(idx - 1)} disabled={idx === 0}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -547,14 +603,14 @@ export default function SiteDeck() {
         </div>
         <div className="mx-auto max-w-6xl px-4 pb-3 md:hidden">
           <div className="flex flex-wrap gap-2">
-            {SLIDES.map((s, i) => (
+            {SLIDES.map((item, index) => (
               <Button
-                key={s.id}
-                variant={i === idx ? "secondary" : "ghost"}
+                key={item.id}
+                variant={index === idx ? "secondary" : "ghost"}
                 size="sm"
-                onClick={() => go(i)}
+                onClick={() => go(index)}
               >
-                {s.nav}
+                {item.nav}
               </Button>
             ))}
           </div>
