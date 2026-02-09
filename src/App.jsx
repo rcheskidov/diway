@@ -3,77 +3,100 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  BarChart3,
   Bot,
   BrainCircuit,
   Building2,
   Camera,
-  BarChart3,
+  ChevronRight,
   CircleDollarSign,
+  Coins,
+  Cpu,
   Database,
   FileText,
+  Gauge,
+  Layers,
   MessageSquareText,
   Radar,
-  Save,
+  Route,
+  ShieldAlert,
   Workflow,
 } from "lucide-react";
 
-const PRODUCT_STAGES = [
+const STORY_STEPS = [
   {
-    id: "stage-1",
-    title: "1. Загружаем знания застройщика",
-    subtitle: "Документы, договоры, сметы, КС/КС2/КС3, переписка, регламенты",
-    output: "Структурированная база знаний для ИИ с привязкой к проектам и контрагентам",
-    icon: Database,
-    risks: ["Непрозрачные обязательства", "Неявные риски в договорах", "Потеря контекста между отделами"],
+    id: "data",
+    title: "1. Собираем данные застройщика",
+    subtitle: "Загружаем документы, договоры, акты, переписку, отчеты и статусы в единую ИИ-базу.",
+    bullets: [
+      "Единая модель: проект -> дом -> подрядчик -> работы -> деньги",
+      "Привязка документов и обязательств к сущностям проекта",
+      "Сохранение источников для аудита каждого вывода ИИ",
+    ],
   },
   {
-    id: "stage-2",
-    title: "2. Ищем потери в бумагах",
-    subtitle: "ИИ анализирует документы, оплаты, сроки и управленческие решения",
-    output: "Список зон потерь с финансовой оценкой и вероятными причинами",
-    icon: CircleDollarSign,
-    risks: ["Переплаты", "Двойные работы", "Сдвиги сроков", "Риски допработ"],
+    id: "loss",
+    title: "2. Находим возможные потери по бумагам",
+    subtitle: "ИИ ищет расхождения между планом, договором, актами и оплатами до появления кассовых потерь.",
+    bullets: [
+      "Риски переплат и не подтвержденных объемов",
+      "Неоднозначные условия в ТЗ и контрактах",
+      "Сигналы срыва сроков по документному контуру",
+    ],
   },
   {
-    id: "stage-3",
-    title: "3. Подтягиваем факт",
-    subtitle: "Фото/видео, отчеты, обратная связь, датчики, CRM, производственные статусы",
-    output: "Проверка реальности: подтверждаем или опровергаем гипотезы о потерях",
-    icon: Camera,
-    risks: ["Отчет не совпадает с фактом", "Скрытые задержки", "Неверифицированные объемы"],
+    id: "reasons",
+    title: "3. Разбираем причины",
+    subtitle: "Система объясняет: почему возник риск, что будет при бездействии и где вмешиваться в первую очередь.",
+    bullets: [
+      "Причина -> последствие -> денежный эффект",
+      "Приоритизация по критичности и сроку реакции",
+      "Рекомендации по управленческому действию",
+    ],
   },
   {
-    id: "stage-4",
-    title: "4. Руководитель получает управляемость",
-    subtitle: "ИИ объясняет причины, рекомендует решения и считает эффект",
-    output: "Единый контур принятия решений по деньгам, срокам и рискам",
-    icon: BrainCircuit,
-    risks: ["Реактивное управление", "Потеря маржи", "Низкая скорость принятия решений"],
+    id: "fact",
+    title: "4. Подключаем фактические данные",
+    subtitle: "Подтягиваем фото/видео, полевые отчеты, обратную связь, CRM и датчики для проверки гипотез.",
+    bullets: [
+      "План/документы сверяются с фактом",
+      "Раннее подтверждение отклонений на площадке",
+      "Формирование доказательной базы по спорным оплатам",
+    ],
+  },
+  {
+    id: "cockpit",
+    title: "5. Управленческий ИИ-контур",
+    subtitle: "Руководитель получает главный экран: где риски, сколько стоят и какие решения дадут эффект.",
+    bullets: [
+      "Единый проектный радар по срокам, деньгам и рискам",
+      "Диалог с ИИ по ролям: директор, стройка, финансы",
+      "Накопление вопросов застройщика как backlog продуктовых идей",
+    ],
   },
 ];
 
-const IMPACT_MODELS = {
-  "Документы и оплаты": {
-    lossRange: "8-22 млн ₽ / проект / год",
-    reason: "Расхождения между договором, актами и фактическим объемом работ",
-    fix: "Автопроверка условий оплаты + ранние предупреждения по сомнительным актам",
-  },
-  "Сроки и подрядчики": {
-    lossRange: "4-15 недель задержки",
-    reason: "Срыв критического пути и поздняя эскалация проблем на участке",
-    fix: "Сигналы отклонений по документам + подтверждение факта по фото/видео",
-  },
-  "Контроль качества": {
-    lossRange: "3-9% бюджета этапа",
-    reason: "Переделки и гарантийные проблемы из-за неполной фиксации качества",
-    fix: "Привязка чек-листов, фотофиксации и претензий к конкретным работам",
-  },
+const PROJECT_CARD = {
+  name: "ЖК Северный Квартал",
+  phase: "Монолит + инженерные сети",
+  health: 72,
+  riskLevel: "Средний",
+  potentialLoss: "14.6 млн ₽",
+  scheduleRisk: "3-4 недели",
+  hotspots: ["Неподтвержденные объемы по актам", "Рост затрат по инженерке", "Отставание отделки секции B"],
 };
+
+const FACT_CHANNELS = [
+  { icon: Camera, label: "Фотофиксация" },
+  { icon: Cpu, label: "Датчики" },
+  { icon: MessageSquareText, label: "Обратная связь" },
+  { icon: Database, label: "CRM / 1C" },
+];
 
 const CHAT_SEED = [
   {
     role: "assistant",
-    text: "Я демонстрационный ИИ-консультант. Спросите, где продукт помогает застройщику сократить потери.",
+    text: "Спросите про ваш проект: я покажу, где продукт находит потери и как подтверждает их фактом.",
   },
 ];
 
@@ -86,43 +109,39 @@ function inferIntent(question) {
     return {
       tag: "Интеграции",
       answer:
-        "Начинаем с выгрузки через API/файлы из 1С и CRM, затем нормализуем данные в единую модель проекта. На старте можно работать без тяжелой интеграции в реальном времени.",
+        "Подключаем 1С/CRM через API или регламентные выгрузки. На первом этапе достаточно пакетной синхронизации, затем можно перейти к near real-time.",
     };
   }
 
-  if (text.includes("датчик") || text.includes("камера") || text.includes("фото") || text.includes("видео")) {
+  if (text.includes("фото") || text.includes("видео") || text.includes("датчик") || text.includes("камера")) {
     return {
-      tag: "Фактические данные",
+      tag: "Факт",
       answer:
-        "Факт подключается как второй контур: фото/видео, датчики и выездные отчеты подтверждают или опровергают риски, найденные в документах.",
+        "Фактический контур подтверждает бумажные риски: фото/видео, отчеты и датчики связываются с конкретными работами и оплатами.",
     };
   }
 
-  if (text.includes("стоим") || text.includes("цена") || text.includes("окуп") || text.includes("roi")) {
+  if (text.includes("окуп") || text.includes("roi") || text.includes("стоим") || text.includes("цена")) {
     return {
       tag: "Экономика",
       answer:
-        "Обычно пилот считают от предотвращенных переплат и снижения сдвигов сроков. В проекте фиксируются базовая потеря, эффект после внедрения и срок окупаемости.",
+        "Эффект считаем от предотвращенных переплат, сокращения переделок и снижения сдвигов сроков. Обычно пилот оценивают на одном проекте и одной зоне риска.",
     };
   }
 
-  if (text.includes("безопас") || text.includes("доступ") || text.includes("персональ")) {
+  if (text.includes("безопас") || text.includes("доступ") || text.includes("персонал")) {
     return {
       tag: "Безопасность",
       answer:
-        "Доступ разграничивается по ролям, критичные данные шифруются, а каждое решение ИИ сохраняется с источниками для аудита.",
+        "Ролевая модель доступа, журнал действий и хранение ссылок на источник для каждого вывода ИИ. Это снижает риск недоверия к рекомендациям.",
     };
   }
 
   return {
     tag: "Продукт",
     answer:
-      "Логика продукта: сначала собираем данные застройщика, затем находим потери в бумагах, после этого подтверждаем факт и выводим причины с конкретными управленческими действиями.",
+      "Последовательность внедрения: данные -> потери по бумагам -> причины -> факт -> управленческий экран и ИИ-диалог.",
   };
-}
-
-function saveQuestionLog(nextLog) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(nextLog));
 }
 
 function loadQuestionLog() {
@@ -136,6 +155,10 @@ function loadQuestionLog() {
   }
 }
 
+function saveQuestionLog(nextLog) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(nextLog));
+}
+
 function formatDateTime(isoDate) {
   return new Intl.DateTimeFormat("ru-RU", {
     dateStyle: "short",
@@ -144,16 +167,14 @@ function formatDateTime(isoDate) {
 }
 
 export default function App() {
-  const [activeStage, setActiveStage] = useState(PRODUCT_STAGES[0].id);
-  const [impactFocus, setImpactFocus] = useState("Документы и оплаты");
-
+  const [activeStep, setActiveStep] = useState(STORY_STEPS[0].id);
   const [messages, setMessages] = useState(CHAT_SEED);
   const [input, setInput] = useState("");
   const [questionLog, setQuestionLog] = useState([]);
 
-  const currentStage = useMemo(
-    () => PRODUCT_STAGES.find((stage) => stage.id === activeStage) || PRODUCT_STAGES[0],
-    [activeStage]
+  const currentStep = useMemo(
+    () => STORY_STEPS.find((step) => step.id === activeStep) || STORY_STEPS[0],
+    [activeStep]
   );
 
   useEffect(() => {
@@ -162,8 +183,8 @@ export default function App() {
 
   const intentStats = useMemo(() => {
     const stats = {};
-    for (const entry of questionLog) {
-      stats[entry.tag] = (stats[entry.tag] || 0) + 1;
+    for (const item of questionLog) {
+      stats[item.tag] = (stats[item.tag] || 0) + 1;
     }
     return stats;
   }, [questionLog]);
@@ -176,14 +197,15 @@ export default function App() {
     const userMessage = { role: "user", text };
     const assistantMessage = { role: "assistant", text: intent.answer };
 
-    const logItem = {
+    const item = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       text,
       tag: intent.tag,
       createdAt: new Date().toISOString(),
     };
 
-    const nextLog = [logItem, ...questionLog];
+    const nextLog = [item, ...questionLog];
+
     setMessages((prev) => [...prev, userMessage, assistantMessage]);
     setQuestionLog(nextLog);
     saveQuestionLog(nextLog);
@@ -202,77 +224,114 @@ export default function App() {
   };
 
   return (
-    <div className="page-shell">
-      <div className="hero-background" aria-hidden="true" />
+    <div className="deck-page">
+      <div className="bg-grid" aria-hidden="true" />
+      <div className="bg-curves" aria-hidden="true" />
 
-      <header className="top-nav">
-        <div className="brand">
-          <div className="brand-icon">
-            <Building2 size={18} />
-          </div>
+      <header className="deck-header">
+        <div className="deck-brand">
+          <Building2 size={18} />
           <div>
             <strong>DIWAY</strong>
-            <p>Платформа управляемости девелопмента</p>
+            <p>ИИ-контур управления девелопментом</p>
           </div>
         </div>
-        <Badge variant="outline">Интерактивная демо-версия</Badge>
+        <Badge variant="outline">Интерактивная презентация</Badge>
       </header>
 
-      <main className="layout-grid">
-        <section className="main-column">
-          <Card className="hero-card">
-            <CardContent>
-              <p className="eyebrow">Цифровой контур для застройщика</p>
-              <h1>Где теряются деньги, сроки и управляемость</h1>
-              <p className="lead">
-                Этот сайт показывает путь продукта: собираем данные, находим потери в бумагах,
-                подтверждаем факт и даем руководителю объяснимые решения.
-              </p>
-              <div className="hero-tags">
-                <Badge variant="secondary">Документы + 1С/CRM</Badge>
-                <Badge variant="secondary">Факт: фото/видео/датчики</Badge>
-                <Badge variant="secondary">ИИ-диалог по ролям</Badge>
-              </div>
-            </CardContent>
-          </Card>
+      <main className="deck-main">
+        <section className="cover-screen">
+          <p className="cover-mark">От слепых зон к управляемой реальности</p>
+          <h1>ИИ-КОНТУР УПРАВЛЕНИЯ ДЕВЕЛОПЕРСКИМ ПРОЕКТОМ</h1>
+          <p className="cover-subtitle">
+            Сначала собираем данные застройщика, затем находим потери в бумагах и подтверждаем их фактом,
+            чтобы руководитель видел причины и действия, а не только отчеты.
+          </p>
+          <div className="cover-pills">
+            <Badge variant="secondary">
+              <Layers size={13} /> Данные проекта
+            </Badge>
+            <Badge variant="secondary">
+              <Route size={13} /> Логика внедрения
+            </Badge>
+            <Badge variant="secondary">
+              <Gauge size={13} /> Управленческий экран
+            </Badge>
+          </div>
+        </section>
 
-          <Card>
+        <section className="project-card-wrap">
+          <Card className="project-card">
             <CardHeader>
-              <CardTitle className="section-title">
-                <Workflow size={18} />
-                Кликабельный путь внедрения
+              <CardTitle className="project-title">
+                <Radar size={18} /> Карточка проекта
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="stage-grid">
-                {PRODUCT_STAGES.map((stage) => {
-                  const Icon = stage.icon;
-                  const isActive = stage.id === currentStage.id;
-                  return (
-                    <button
-                      key={stage.id}
-                      className={`stage-chip ${isActive ? "active" : ""}`}
-                      onClick={() => setActiveStage(stage.id)}
-                    >
-                      <Icon size={16} />
-                      <span>{stage.title}</span>
-                    </button>
-                  );
-                })}
+              <div className="project-head">
+                <div>
+                  <p className="project-name">{PROJECT_CARD.name}</p>
+                  <p className="project-phase">{PROJECT_CARD.phase}</p>
+                </div>
+                <Badge variant="outline">Риск: {PROJECT_CARD.riskLevel}</Badge>
               </div>
 
-              <div className="stage-details">
-                <h3>{currentStage.title}</h3>
-                <p>{currentStage.subtitle}</p>
-                <div className="result-box">
-                  <strong>Результат этапа:</strong>
-                  <span>{currentStage.output}</span>
-                </div>
-                <div className="risk-list">
-                  {currentStage.risks.map((risk) => (
-                    <Badge key={risk} variant="outline">
-                      {risk}
-                    </Badge>
+              <div className="metrics-grid">
+                <article>
+                  <p>Health Index</p>
+                  <strong>{PROJECT_CARD.health}/100</strong>
+                </article>
+                <article>
+                  <p>Потенциальные потери</p>
+                  <strong>{PROJECT_CARD.potentialLoss}</strong>
+                </article>
+                <article>
+                  <p>Риск сдвига срока</p>
+                  <strong>{PROJECT_CARD.scheduleRisk}</strong>
+                </article>
+              </div>
+
+              <div className="hotspots">
+                {PROJECT_CARD.hotspots.map((point) => (
+                  <div key={point} className="hotspot-item">
+                    <ShieldAlert size={14} />
+                    <span>{point}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="story-layout">
+          <Card>
+            <CardHeader>
+              <CardTitle className="section-title">
+                <Workflow size={18} /> Последовательность донесения ценности
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="step-tabs">
+                {STORY_STEPS.map((step) => (
+                  <button
+                    key={step.id}
+                    className={`step-tab ${activeStep === step.id ? "active" : ""}`}
+                    onClick={() => setActiveStep(step.id)}
+                  >
+                    {step.title}
+                  </button>
+                ))}
+              </div>
+
+              <div className="step-detail">
+                <h3>{currentStep.title}</h3>
+                <p>{currentStep.subtitle}</p>
+                <div className="bullet-grid">
+                  {currentStep.bullets.map((bullet) => (
+                    <div key={bullet} className="bullet-item">
+                      <ChevronRight size={14} />
+                      <span>{bullet}</span>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -282,36 +341,61 @@ export default function App() {
           <Card>
             <CardHeader>
               <CardTitle className="section-title">
-                <Radar size={18} />
-                Симулятор эффекта
+                <Database size={18} /> Каналы фактических данных
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="impact-buttons">
-                {Object.keys(IMPACT_MODELS).map((name) => (
-                  <Button
-                    key={name}
-                    variant={impactFocus === name ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setImpactFocus(name)}
-                  >
-                    {name}
-                  </Button>
+              <div className="channels-grid">
+                {FACT_CHANNELS.map((channel) => {
+                  const Icon = channel.icon;
+                  return (
+                    <div key={channel.label} className="channel-card">
+                      <Icon size={16} />
+                      <span>{channel.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="result-note">
+                <CircleDollarSign size={16} />
+                <p>
+                  На выходе не просто аналитика, а объясненные решения: где теряем, почему и какое действие
+                  даст максимальный финансовый эффект.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <section className="chat-layout">
+          <Card className="chat-card">
+            <CardHeader>
+              <CardTitle className="section-title">
+                <MessageSquareText size={18} /> ИИ-чат для застройщика
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="chat-list">
+                {messages.map((message, index) => (
+                  <article key={index} className={`chat-bubble ${message.role}`}>
+                    <p className="chat-role">
+                      {message.role === "assistant" ? <Bot size={13} /> : <FileText size={13} />}
+                      {message.role === "assistant" ? "ИИ" : "Пользователь"}
+                    </p>
+                    <p>{message.text}</p>
+                  </article>
                 ))}
               </div>
-              <div className="impact-panel">
-                <div>
-                  <p className="impact-label">Потенциальные потери</p>
-                  <p className="impact-value">{IMPACT_MODELS[impactFocus].lossRange}</p>
-                </div>
-                <div>
-                  <p className="impact-label">Основная причина</p>
-                  <p>{IMPACT_MODELS[impactFocus].reason}</p>
-                </div>
-                <div>
-                  <p className="impact-label">Что внедряем</p>
-                  <p>{IMPACT_MODELS[impactFocus].fix}</p>
-                </div>
+
+              <div className="chat-form">
+                <textarea
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  rows={3}
+                  placeholder="Например: как быстро подключить 1С и фотофиксацию для пилота?"
+                />
+                <Button onClick={onSend}>Отправить</Button>
               </div>
             </CardContent>
           </Card>
@@ -319,21 +403,20 @@ export default function App() {
           <Card>
             <CardHeader>
               <CardTitle className="section-title">
-                <Save size={18} />
-                Накопленные вопросы застройщика
+                <BarChart3 size={18} /> Накопление вопросов и идей
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="question-header">
+              <div className="log-top">
                 <p>
-                  В базе: <strong>{questionLog.length}</strong> вопросов
+                  Сохранено вопросов: <strong>{questionLog.length}</strong>
                 </p>
                 <Button variant="secondary" size="sm" onClick={exportQuestions} disabled={!questionLog.length}>
                   Экспорт JSON
                 </Button>
               </div>
 
-              <div className="stats-line">
+              <div className="tags-row">
                 {Object.entries(intentStats).length ? (
                   Object.entries(intentStats).map(([tag, count]) => (
                     <Badge key={tag} variant="secondary">
@@ -341,17 +424,17 @@ export default function App() {
                     </Badge>
                   ))
                 ) : (
-                  <span className="empty-state">Пока нет вопросов. Задайте их в чате справа.</span>
+                  <span className="placeholder-text">Вопросы появятся после первого диалога в чате.</span>
                 )}
               </div>
 
-              <div className="question-list">
-                {questionLog.slice(0, 8).map((entry) => (
-                  <article key={entry.id} className="question-item">
-                    <p>{entry.text}</p>
+              <div className="log-list">
+                {questionLog.slice(0, 7).map((item) => (
+                  <article key={item.id} className="log-item">
+                    <p>{item.text}</p>
                     <div>
-                      <Badge variant="outline">{entry.tag}</Badge>
-                      <span>{formatDateTime(entry.createdAt)}</span>
+                      <Badge variant="outline">{item.tag}</Badge>
+                      <span>{formatDateTime(item.createdAt)}</span>
                     </div>
                   </article>
                 ))}
@@ -359,58 +442,17 @@ export default function App() {
             </CardContent>
           </Card>
         </section>
-
-        <aside className="chat-column">
-          <Card className="chat-card">
-            <CardHeader>
-              <CardTitle className="section-title">
-                <MessageSquareText size={18} />
-                ИИ-чат для диалога с застройщиком
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="chat-body">
-                {messages.map((message, index) => (
-                  <div key={index} className={`bubble ${message.role}`}>
-                    <div className="bubble-head">
-                      {message.role === "assistant" ? <Bot size={14} /> : <FileText size={14} />}
-                      <strong>{message.role === "assistant" ? "ИИ" : "Пользователь"}</strong>
-                    </div>
-                    <p>{message.text}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="chat-input-wrap">
-                <textarea
-                  value={input}
-                  onChange={(event) => setInput(event.target.value)}
-                  placeholder="Например: Как вы подключаетесь к 1С и CRM?"
-                  rows={3}
-                />
-                <Button onClick={onSend}>Отправить и сохранить вопрос</Button>
-              </div>
-
-              <p className="chat-note">
-                Каждый ваш вопрос автоматически сохраняется в накопитель идей и доступен для дальнейшего анализа.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent>
-              <p className="mini-title">
-                <BarChart3 size={16} /> Что дальше после демо
-              </p>
-              <ul className="next-steps">
-                <li>Пилот на одном проекте и одном блоке потерь</li>
-                <li>Подключение источников факта (фото/видео/датчики)</li>
-                <li>Dashboard для директора и руководителей направлений</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </aside>
       </main>
+
+      <footer className="deck-footer">
+        <p>
+          Логика страницы повторяет последовательность презентации: данные → потери → причины → факт →
+          управленческий контур.
+        </p>
+        <p className="footer-icons">
+          <Coins size={14} /> Деньги <ChevronRight size={14} /> <Gauge size={14} /> Управляемость
+        </p>
+      </footer>
     </div>
   );
 }
