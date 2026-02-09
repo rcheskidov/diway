@@ -1,633 +1,416 @@
-import React, { useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Sparkles,
-  ShieldAlert,
-  Layers,
-  Route,
-  Gauge,
+  Bot,
+  BrainCircuit,
   Building2,
-  ClipboardCheck,
+  Camera,
+  BarChart3,
+  CircleDollarSign,
+  Database,
   FileText,
-  Cpu,
-  Coins,
-  Users,
-  Wrench,
   MessageSquareText,
+  Radar,
+  Save,
+  Workflow,
 } from "lucide-react";
 
-/**
- * One-file interactive site-deck for Miro/Pitch use.
- * - Clickable navigation (slides)
- * - Role-based agents overview
- * - Requirements (why staged rollout)
- * - Roadmap 1→4
- * - Sample dialogs (Stage 1 & 2)
- *
- * Customize texts in SLIDES below.
- */
-
-const Pill = ({ icon: Icon, label }) => (
-  <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
-    {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
-    {label}
-  </span>
-);
-
-const SlideShell = ({ title, subtitle, children }) => (
-  <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6">
-    <div className="mb-6">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Sparkles className="h-4 w-4" />
-        <span>Digital Twin + AI Agents for Developers</span>
-      </div>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight">{title}</h1>
-      {subtitle ? <p className="mt-2 max-w-3xl text-muted-foreground">{subtitle}</p> : null}
-    </div>
-    {children}
-  </div>
-);
-
-function KPI({ label, value, delta, tone }) {
-  const badge = tone === "ok" ? "secondary" : tone === "warn" ? "outline" : "destructive";
-  return (
-    <Card className="rounded-2xl">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="text-sm text-muted-foreground">{label}</div>
-            <div className="mt-1 text-2xl font-semibold">{value}</div>
-          </div>
-          {delta ? (
-            <Badge variant={badge} className="h-fit">
-              {delta}
-            </Badge>
-          ) : null}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-const AgentCard = ({ icon: Icon, name, question, tags, onOpen }) => (
-  <Card className="group rounded-2xl">
-    <CardContent className="p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="rounded-2xl border p-2">
-            <Icon className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-base font-semibold">{name}</div>
-            <div className="mt-1 text-sm text-muted-foreground">{question}</div>
-          </div>
-        </div>
-        <Button variant="ghost" className="opacity-70 group-hover:opacity-100" onClick={onOpen}>
-          Подробнее
-        </Button>
-      </div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {(tags || []).map((tag, index) => (
-          <Badge key={index} variant="secondary">
-            {tag}
-          </Badge>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
-
-const RoadmapStep = ({ step, title, duration, price, what, data }) => (
-  <Card className="rounded-2xl">
-    <CardHeader className="pb-2">
-      <CardTitle className="flex items-center justify-between">
-        <span className="text-base">
-          Этап {step}. {title}
-        </span>
-        <Badge variant="outline">
-          {duration} • {price}
-        </Badge>
-      </CardTitle>
-    </CardHeader>
-    <CardContent className="space-y-3">
-      <div className="text-sm text-muted-foreground">Что делаем</div>
-      <ul className="list-disc space-y-1 pl-5 text-sm">
-        {what.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-      <div className="text-sm text-muted-foreground">Данные</div>
-      <div className="flex flex-wrap gap-2">
-        {data.map((item, index) => (
-          <Badge key={index} variant="secondary">
-            {item}
-          </Badge>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
-
-const SLIDES = [
+const PRODUCT_STAGES = [
   {
-    id: "intro",
-    nav: "Вступление",
-    title: "Управление девелопментом в реальном времени",
-    subtitle: "Не новая ERP. Не ещё один отчёт. Слой управляемости: план → обязательства → факт → деньги → риск → решения.",
-    render: () => (
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="rounded-2xl md:col-span-2">
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-2">
-              <Pill icon={Gauge} label="Единый CEO-экран" />
-              <Pill icon={Layers} label="Модульно: агенты по ролям" />
-              <Pill icon={Route} label="Поэтапное внедрение" />
-              <Pill icon={ShieldAlert} label="Контроль потерь: деньги/сроки/риск" />
-            </div>
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              <Card className="rounded-2xl">
-                <CardContent className="p-5">
-                  <div className="text-sm text-muted-foreground">Главная мысль</div>
-                  <div className="mt-1 text-lg font-semibold">Контроль ≠ управляемость</div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    Контроля (камеры, журналы, BI) много. Управленческий ответ: <span className="text-foreground">куда вмешиваться и почему</span> — редкость.
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="rounded-2xl">
-                <CardContent className="p-5">
-                  <div className="text-sm text-muted-foreground">Что продаём</div>
-                  <div className="mt-1 text-lg font-semibold">Снижение неуправляемых потерь</div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    Ранние сигналы, доказательная база, приоритизация действий, прозрачность по ролям.
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl">
-          <CardContent className="p-6">
-            <div className="text-sm text-muted-foreground">Обычно болит</div>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">
-              <li>Решения с планёрок не превращаются в действия</li>
-              <li>Документы есть, но не связаны с реальностью проекта</li>
-              <li>Факт узнают поздно → потери в сроках и деньгах</li>
-              <li>Тяжело доказать «за что платим»</li>
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
-    ),
+    id: "stage-1",
+    title: "1. Загружаем знания застройщика",
+    subtitle: "Документы, договоры, сметы, КС/КС2/КС3, переписка, регламенты",
+    output: "Структурированная база знаний для ИИ с привязкой к проектам и контрагентам",
+    icon: Database,
+    risks: ["Непрозрачные обязательства", "Неявные риски в договорах", "Потеря контекста между отделами"],
   },
   {
-    id: "ceo",
-    nav: "CEO-экран",
-    title: "Главный экран директора",
-    subtitle: "Один экран отвечает на вопрос: где сейчас мой бизнес под угрозой?",
-    render: () => (
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-4">
-          <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-sm text-muted-foreground">Development Health Index</div>
-                  <div className="mt-1 text-3xl font-semibold">
-                    72 / 100 <span className="text-base text-muted-foreground">🟡</span>
-                  </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    Не финпоказатель. Управленческий индикатор зрелости исполнения и рисков.
-                  </div>
-                </div>
-                <div className="w-56">
-                  <Progress value={72} />
-                  <div className="mt-2 text-xs text-muted-foreground">Давление: Строительство −12 • Финансы −6</div>
-                </div>
-              </div>
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                <KPI label="Строительство" value="58 🔴" delta="↓−7 / 2н" tone="bad" />
-                <KPI label="Финансы" value="70 🟡" delta="↓−2 / 2н" tone="warn" />
-                <KPI label="Исполнение" value="61 🟡" delta="→" tone="warn" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">Проблемные проекты</div>
-                <Badge variant="outline">по индексу</Badge>
-              </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <Card className="rounded-2xl">
-                  <CardContent className="p-5">
-                    <div className="flex items-center justify-between">
-                      <div className="font-semibold">ЖК A</div>
-                      <Badge variant="destructive">55 🔴</Badge>
-                    </div>
-                    <div className="mt-2 text-sm text-muted-foreground">Причина: отставание отделки, неподтверждённые объёмы</div>
-                  </CardContent>
-                </Card>
-                <Card className="rounded-2xl">
-                  <CardContent className="p-5">
-                    <div className="flex items-center justify-between">
-                      <div className="font-semibold">ЖК B</div>
-                      <Badge variant="outline">72 🟡</Badge>
-                    </div>
-                    <div className="mt-2 text-sm text-muted-foreground">Причина: рост затрат по инженерке</div>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="rounded-2xl">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <MessageSquareText className="h-4 w-4" /> AI-объяснение
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="rounded-xl border p-3">
-              <div className="font-semibold">Почему упал индекс строительства?</div>
-              <div className="mt-2 text-muted-foreground">
-                1) Отставание отделки (−9) • 2) Неподтверждённые объёмы (−5) • 3) HSE нарушения (−2)
-              </div>
-            </div>
-            <div className="rounded-xl border p-3">
-              <div className="font-semibold">Если не вмешиваться</div>
-              <div className="mt-2 text-muted-foreground">
-                Риск сдвига ввода секций B/C на 3–4 недели. Потенциальная переплата: ~14 млн ₽.
-              </div>
-            </div>
-            <div className="rounded-xl border p-3">
-              <div className="font-semibold">Что сделать</div>
-              <div className="mt-2 text-muted-foreground">
-                Заморозить оплату неподтверждённых объёмов • запросить подтверждения • усилить контроль участка.
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    ),
+    id: "stage-2",
+    title: "2. Ищем потери в бумагах",
+    subtitle: "ИИ анализирует документы, оплаты, сроки и управленческие решения",
+    output: "Список зон потерь с финансовой оценкой и вероятными причинами",
+    icon: CircleDollarSign,
+    risks: ["Переплаты", "Двойные работы", "Сдвиги сроков", "Риски допработ"],
   },
   {
-    id: "agents",
-    nav: "Агенты",
-    title: "ИИ-агенты = управленческие вопросы",
-    subtitle: "Один слайд. Один вопрос на агента. Можно начинать с любого.",
-    render: () => <AgentsSlide />,
+    id: "stage-3",
+    title: "3. Подтягиваем факт",
+    subtitle: "Фото/видео, отчеты, обратная связь, датчики, CRM, производственные статусы",
+    output: "Проверка реальности: подтверждаем или опровергаем гипотезы о потерях",
+    icon: Camera,
+    risks: ["Отчет не совпадает с фактом", "Скрытые задержки", "Неверифицированные объемы"],
   },
   {
-    id: "requirements",
-    nav: "Требования",
-    title: "Требования к конечному продукту",
-    subtitle: "Полноценный цифровой двойник требует зрелых процессов, систем и дисциплины. Поэтому идём поэтапно.",
-    render: () => (
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="rounded-2xl">
-          <CardContent className="p-6 space-y-3">
-            <div className="flex items-center gap-2 font-semibold">
-              <Layers className="h-4 w-4" /> Системы и цифровизация
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">1С/ERP</Badge>
-              <Badge variant="secondary">CRM</Badge>
-              <Badge variant="secondary">BIM / CDE</Badge>
-              <Badge variant="secondary">Документы (СЭД/DMS)</Badge>
-              <Badge variant="secondary">Единые справочники</Badge>
-            </div>
-            <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-              <li>Единая модель проектов и справочники</li>
-              <li>Финансовая «правда» в 1С/ERP</li>
-              <li>Версионность проектной документации</li>
-            </ul>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl">
-          <CardContent className="p-6 space-y-3">
-            <div className="flex items-center gap-2 font-semibold">
-              <ClipboardCheck className="h-4 w-4" /> Процессы и дисциплина
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">Регулярная фиксация факта</Badge>
-              <Badge variant="secondary">Отчётность подрядчиков</Badge>
-              <Badge variant="secondary">HSE контроль</Badge>
-              <Badge variant="secondary">Изменения (Change control)</Badge>
-            </div>
-            <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-              <li>Подрядчики подтверждают выполнение</li>
-              <li>Решения с планёрок превращаются в задачи</li>
-              <li>Факт связывается с деньгами и рисками</li>
-            </ul>
-          </CardContent>
-        </Card>
-        <Card className="rounded-2xl md:col-span-2">
-          <CardContent className="p-6">
-            <div className="text-sm text-muted-foreground">Вывод</div>
-            <div className="mt-1 text-lg font-semibold">Не «волшебная кнопка», а реалистичный путь к управляемости</div>
-            <div className="mt-2 text-sm text-muted-foreground">
-              Поэтому внедрение — по этапам: сначала польза без интеграций, затем контекст проекта, затем факт, затем управленческий cockpit.
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    ),
-  },
-  {
-    id: "roadmap",
-    nav: "Roadmap",
-    title: "Путь к конечному продукту",
-    subtitle: "Поэтапно наращиваем данные → метрики → управленческие решения.",
-    render: () => (
-      <div className="grid gap-4 md:grid-cols-2">
-        <RoadmapStep
-          step={1}
-          title="Консультационный ИИ"
-          duration="4–6 недель"
-          price="1.5–3 млн ₽"
-          what={["Role-based агенты на знаниях рынка/нормативки", "Спец-агент по закупкам: диапазоны цен, поставщики", "Метрики использования (adoption)"]}
-          data={["Интернет", "Бенчмарки", "Best practices"]}
-        />
-        <RoadmapStep
-          step={2}
-          title="Модель проекта + документы (+1С)"
-          duration="6–10 недель"
-          price="3–6 млн ₽"
-          what={["Единая модель: проект/дом/работы/подрядчики", "Загрузка и привязка документов к сущностям", "Импорт КС/актов из 1С (если есть)", "Ранние риски: обязательства, допработы, условия оплаты"]}
-          data={["Документы", "1С (КС)", "Контракты", "ТЗ"]}
-        />
-        <RoadmapStep
-          step={3}
-          title="Факт: фото/видео, камеры, датчики"
-          duration="10–16 недель"
-          price="6–12 млн ₽"
-          what={["Мобильная фиксация факта работ", "Камеры + авто HSE/активность", "Датчики точечно (набор прочности и др.)", "Сверка: план/обязательства ↔ факт"]}
-          data={["Фото/видео", "Камеры", "IoT датчики", "Статусы"]}
-        />
-        <RoadmapStep
-          step={4}
-          title="Единый cockpit + ИИ по ролям"
-          duration="8–12 недель"
-          price="8–15 млн ₽"
-          what={["Индексы процессов и проектов", "Причина→последствие: деньги/сроки/риски", "Ответы ИИ по ролям + рекомендации", "Аудит и прозрачность решений"]}
-          data={["Plan/Fact", "Деньги", "Риски", "История"]}
-        />
-      </div>
-    ),
-  },
-  {
-    id: "dialogs",
-    nav: "Примеры",
-    title: "Как выглядит общение с ИИ",
-    subtitle: "Показываем разницу: Этап 1 (рынок) → Этап 2 (ваши документы и 1С).",
-    render: () => (
-      <Tabs defaultValue="s1" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="s1">Этап 1: консультационный</TabsTrigger>
-          <TabsTrigger value="s2">Этап 2: в контексте проекта</TabsTrigger>
-        </TabsList>
-        <TabsContent value="s1" className="mt-4">
-          <Card className="rounded-2xl">
-            <CardContent className="p-6 space-y-4">
-              <div className="text-sm text-muted-foreground">Роль: Закупки</div>
-              <div className="rounded-xl border p-4">
-                <div className="font-semibold">Пользователь</div>
-                <div className="mt-1 text-sm text-muted-foreground">Где чаще всего переплачивают на бетоне и арматуре? Какие рыночные диапазоны цен?</div>
-              </div>
-              <div className="rounded-xl border p-4">
-                <div className="font-semibold">ИИ</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  Типовые зоны переплаты: объёмы «с запасом», отсутствие альтернативных поставщиков, непрозрачная логистика. Даю рыночные диапазоны и чек‑лист проверки.
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="s2" className="mt-4">
-          <Card className="rounded-2xl">
-            <CardContent className="p-6 space-y-4">
-              <div className="text-sm text-muted-foreground">Роль: Стройка / Финансы</div>
-              <div className="rounded-xl border p-4">
-                <div className="font-semibold">Пользователь</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  Покажи риски по подрядчику «МонолитСтрой» на ЖК «Северный». Есть ли проблемы в КС?
-                </div>
-              </div>
-              <div className="rounded-xl border p-4">
-                <div className="font-semibold">ИИ</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  В договоре №14 и ТЗ есть неоднозначность по границам объёмов. В последних КС (из 1С) есть позиции без чёткой привязки к ТЗ → риск допработ/спора. Рекомендую уточнить формулировки до оплаты.
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    ),
+    id: "stage-4",
+    title: "4. Руководитель получает управляемость",
+    subtitle: "ИИ объясняет причины, рекомендует решения и считает эффект",
+    output: "Единый контур принятия решений по деньгам, срокам и рискам",
+    icon: BrainCircuit,
+    risks: ["Реактивное управление", "Потеря маржи", "Низкая скорость принятия решений"],
   },
 ];
 
-function AgentsSlide() {
-  const [open, setOpen] = useState(null);
-  const agents = useMemo(
-    () => [
-      {
-        id: "exec",
-        icon: ClipboardCheck,
-        name: "Execution / Management Agent",
-        question: "Где решения с планёрок перестают исполняться?",
-        tags: ["Дисциплина", "Поручения", "Эскалации"],
-        details: [
-          "Фиксирует решения и поручения → связывает с проектами/рисками",
-          "Показывает просрочки и зоны потери управляемости",
-          "Сводки для директора: где вмешаться лично",
-        ],
-      },
-      {
-        id: "design",
-        icon: FileText,
-        name: "Design Agent",
-        question: "Где проектные решения приведут к переделкам и срыву сроков?",
-        tags: ["Комплектность", "Версии", "Изменения"],
-        details: [
-          "Контроль комплектности и версий проектной документации",
-          "Поиск противоречий между разделами (без BIM как обязательного условия)",
-          "Риски переделок и влияния изменений на сроки/стоимость",
-        ],
-      },
-      {
-        id: "build",
-        icon: Building2,
-        name: "Construction Agent",
-        question: "Где стройка теряет управляемость и создаёт риск по срокам?",
-        tags: ["Plan vs Fact", "Подрядчики", "HSE"],
-        details: [
-          "Контроль готовности к этапам и темпов",
-          "Выявление проблемных подрядчиков и повторяемости отклонений",
-          "HSE сигналы (каски/опасные зоны) при наличии камер",
-        ],
-      },
-      {
-        id: "fin",
-        icon: Coins,
-        name: "Finance & Procurement Agent",
-        question: "За что мы реально платим и где спрятаны будущие потери?",
-        tags: ["КС/акты", "Рынок", "Допработы"],
-        details: [
-          "Проверка рыночности цен по SKU и поиск альтернатив",
-          "Ранние риски в договорах/ТЗ (допработы, условия оплаты)",
-          "Сверка актов и факта (на этапе 3+)",
-        ],
-      },
-      {
-        id: "ops",
-        icon: Wrench,
-        name: "Operations Agent",
-        question: "После ввода объект будет активом или проблемой?",
-        tags: ["Паспорта", "Гарантии", "OPEX"],
-        details: [
-          "Контроль передачи: паспорта, регламенты, гарантии",
-          "Анализ инцидентов/заявок и причин (после ввода)",
-          "Бенчмарки OPEX и точки оптимизации",
-        ],
-      },
-      {
-        id: "hr",
-        icon: Users,
-        name: "HR / Workforce Agent",
-        question: "Где люди начинают срывать сроки и увеличивать стоимость проекта?",
-        tags: ["Дефицит", "Текучесть", "Стоимость"],
-        details: [
-          "Обеспеченность кадрами по этапам и критическим ролям",
-          "Текучесть и стоимость найма/адаптации",
-          "Связь кадровых проблем с рисками сроков",
-        ],
-      },
-    ],
-    []
-  );
+const IMPACT_MODELS = {
+  "Документы и оплаты": {
+    lossRange: "8-22 млн ₽ / проект / год",
+    reason: "Расхождения между договором, актами и фактическим объемом работ",
+    fix: "Автопроверка условий оплаты + ранние предупреждения по сомнительным актам",
+  },
+  "Сроки и подрядчики": {
+    lossRange: "4-15 недель задержки",
+    reason: "Срыв критического пути и поздняя эскалация проблем на участке",
+    fix: "Сигналы отклонений по документам + подтверждение факта по фото/видео",
+  },
+  "Контроль качества": {
+    lossRange: "3-9% бюджета этапа",
+    reason: "Переделки и гарантийные проблемы из-за неполной фиксации качества",
+    fix: "Привязка чек-листов, фотофиксации и претензий к конкретным работам",
+  },
+};
 
-  const current = agents.find((agent) => agent.id === open);
+const CHAT_SEED = [
+  {
+    role: "assistant",
+    text: "Я демонстрационный ИИ-консультант. Спросите, где продукт помогает застройщику сократить потери.",
+  },
+];
 
-  return (
-    <>
-      <div className="grid gap-4 md:grid-cols-2">
-        {agents.map((agent) => (
-          <AgentCard
-            key={agent.id}
-            icon={agent.icon}
-            name={agent.name}
-            question={agent.question}
-            tags={agent.tags}
-            onOpen={() => setOpen(agent.id)}
-          />
-        ))}
-      </div>
+const STORAGE_KEY = "developer_questions_log_v1";
 
-      <Dialog open={Boolean(open)} onOpenChange={(value) => !value && setOpen(null)}>
-        <DialogContent className="sm:max-w-[640px] rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {current?.icon ? <current.icon className="h-5 w-5" /> : null}
-              {current?.name}
-            </DialogTitle>
-            <DialogDescription>{current?.question}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2 text-sm">
-            {(current?.details || []).map((detail, index) => (
-              <div key={index} className="rounded-xl border p-3 text-muted-foreground">
-                {detail}
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
+function inferIntent(question) {
+  const text = question.toLowerCase();
+
+  if (text.includes("1с") || text.includes("erp") || text.includes("crm")) {
+    return {
+      tag: "Интеграции",
+      answer:
+        "Начинаем с выгрузки через API/файлы из 1С и CRM, затем нормализуем данные в единую модель проекта. На старте можно работать без тяжелой интеграции в реальном времени.",
+    };
+  }
+
+  if (text.includes("датчик") || text.includes("камера") || text.includes("фото") || text.includes("видео")) {
+    return {
+      tag: "Фактические данные",
+      answer:
+        "Факт подключается как второй контур: фото/видео, датчики и выездные отчеты подтверждают или опровергают риски, найденные в документах.",
+    };
+  }
+
+  if (text.includes("стоим") || text.includes("цена") || text.includes("окуп") || text.includes("roi")) {
+    return {
+      tag: "Экономика",
+      answer:
+        "Обычно пилот считают от предотвращенных переплат и снижения сдвигов сроков. В проекте фиксируются базовая потеря, эффект после внедрения и срок окупаемости.",
+    };
+  }
+
+  if (text.includes("безопас") || text.includes("доступ") || text.includes("персональ")) {
+    return {
+      tag: "Безопасность",
+      answer:
+        "Доступ разграничивается по ролям, критичные данные шифруются, а каждое решение ИИ сохраняется с источниками для аудита.",
+    };
+  }
+
+  return {
+    tag: "Продукт",
+    answer:
+      "Логика продукта: сначала собираем данные застройщика, затем находим потери в бумагах, после этого подтверждаем факт и выводим причины с конкретными управленческими действиями.",
+  };
 }
 
-export default function SiteDeck() {
-  const [idx, setIdx] = useState(0);
-  const slide = SLIDES[idx];
+function saveQuestionLog(nextLog) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(nextLog));
+}
 
-  const go = (nextIndex) => setIdx((prev) => Math.min(Math.max(nextIndex, 0), SLIDES.length - 1));
+function loadQuestionLog() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function formatDateTime(isoDate) {
+  return new Intl.DateTimeFormat("ru-RU", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(isoDate));
+}
+
+export default function App() {
+  const [activeStage, setActiveStage] = useState(PRODUCT_STAGES[0].id);
+  const [impactFocus, setImpactFocus] = useState("Документы и оплаты");
+
+  const [messages, setMessages] = useState(CHAT_SEED);
+  const [input, setInput] = useState("");
+  const [questionLog, setQuestionLog] = useState([]);
+
+  const currentStage = useMemo(
+    () => PRODUCT_STAGES.find((stage) => stage.id === activeStage) || PRODUCT_STAGES[0],
+    [activeStage]
+  );
+
+  useEffect(() => {
+    setQuestionLog(loadQuestionLog());
+  }, []);
+
+  const intentStats = useMemo(() => {
+    const stats = {};
+    for (const entry of questionLog) {
+      stats[entry.tag] = (stats[entry.tag] || 0) + 1;
+    }
+    return stats;
+  }, [questionLog]);
+
+  const onSend = () => {
+    const text = input.trim();
+    if (!text) return;
+
+    const intent = inferIntent(text);
+    const userMessage = { role: "user", text };
+    const assistantMessage = { role: "assistant", text: intent.answer };
+
+    const logItem = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      text,
+      tag: intent.tag,
+      createdAt: new Date().toISOString(),
+    };
+
+    const nextLog = [logItem, ...questionLog];
+    setMessages((prev) => [...prev, userMessage, assistantMessage]);
+    setQuestionLog(nextLog);
+    saveQuestionLog(nextLog);
+    setInput("");
+  };
+
+  const exportQuestions = () => {
+    const payload = JSON.stringify(questionLog, null, 2);
+    const blob = new Blob([payload], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `developer-questions-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <div className="rounded-xl border p-2">
-              <Cpu className="h-4 w-4" />
-            </div>
-            <div>
-              <div className="text-sm font-semibold leading-none">AI Product Strategist</div>
-              <div className="text-xs text-muted-foreground">Interactive pitch deck</div>
-            </div>
-          </div>
+    <div className="page-shell">
+      <div className="hero-background" aria-hidden="true" />
 
-          <div className="hidden gap-2 md:flex">
-            {SLIDES.map((item, index) => (
-              <Button
-                key={item.id}
-                variant={index === idx ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => go(index)}
-              >
-                {item.nav}
-              </Button>
-            ))}
+      <header className="top-nav">
+        <div className="brand">
+          <div className="brand-icon">
+            <Building2 size={18} />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">
-              {idx + 1} / {SLIDES.length}
-            </Badge>
-            <Button variant="outline" size="icon" onClick={() => go(idx - 1)} disabled={idx === 0}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button size="icon" onClick={() => go(idx + 1)} disabled={idx === SLIDES.length - 1}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+          <div>
+            <strong>DIWAY</strong>
+            <p>Платформа управляемости девелопмента</p>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-4 pb-3 md:hidden">
-          <div className="flex flex-wrap gap-2">
-            {SLIDES.map((item, index) => (
-              <Button
-                key={item.id}
-                variant={index === idx ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => go(index)}
-              >
-                {item.nav}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <Badge variant="outline">Интерактивная демо-версия</Badge>
       </header>
 
-      <main>
-        <SlideShell title={slide.title} subtitle={slide.subtitle}>
-          {slide.render()}
-        </SlideShell>
-      </main>
+      <main className="layout-grid">
+        <section className="main-column">
+          <Card className="hero-card">
+            <CardContent>
+              <p className="eyebrow">Цифровой контур для застройщика</p>
+              <h1>Где теряются деньги, сроки и управляемость</h1>
+              <p className="lead">
+                Этот сайт показывает путь продукта: собираем данные, находим потери в бумагах,
+                подтверждаем факт и даем руководителю объяснимые решения.
+              </p>
+              <div className="hero-tags">
+                <Badge variant="secondary">Документы + 1С/CRM</Badge>
+                <Badge variant="secondary">Факт: фото/видео/датчики</Badge>
+                <Badge variant="secondary">ИИ-диалог по ролям</Badge>
+              </div>
+            </CardContent>
+          </Card>
 
-      <footer className="border-t">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-muted-foreground">
-          Подсказка: правьте тексты в массиве <span className="font-mono">SLIDES</span> — это однофайловая сайт‑презентация.
-        </div>
-      </footer>
+          <Card>
+            <CardHeader>
+              <CardTitle className="section-title">
+                <Workflow size={18} />
+                Кликабельный путь внедрения
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="stage-grid">
+                {PRODUCT_STAGES.map((stage) => {
+                  const Icon = stage.icon;
+                  const isActive = stage.id === currentStage.id;
+                  return (
+                    <button
+                      key={stage.id}
+                      className={`stage-chip ${isActive ? "active" : ""}`}
+                      onClick={() => setActiveStage(stage.id)}
+                    >
+                      <Icon size={16} />
+                      <span>{stage.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="stage-details">
+                <h3>{currentStage.title}</h3>
+                <p>{currentStage.subtitle}</p>
+                <div className="result-box">
+                  <strong>Результат этапа:</strong>
+                  <span>{currentStage.output}</span>
+                </div>
+                <div className="risk-list">
+                  {currentStage.risks.map((risk) => (
+                    <Badge key={risk} variant="outline">
+                      {risk}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="section-title">
+                <Radar size={18} />
+                Симулятор эффекта
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="impact-buttons">
+                {Object.keys(IMPACT_MODELS).map((name) => (
+                  <Button
+                    key={name}
+                    variant={impactFocus === name ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setImpactFocus(name)}
+                  >
+                    {name}
+                  </Button>
+                ))}
+              </div>
+              <div className="impact-panel">
+                <div>
+                  <p className="impact-label">Потенциальные потери</p>
+                  <p className="impact-value">{IMPACT_MODELS[impactFocus].lossRange}</p>
+                </div>
+                <div>
+                  <p className="impact-label">Основная причина</p>
+                  <p>{IMPACT_MODELS[impactFocus].reason}</p>
+                </div>
+                <div>
+                  <p className="impact-label">Что внедряем</p>
+                  <p>{IMPACT_MODELS[impactFocus].fix}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="section-title">
+                <Save size={18} />
+                Накопленные вопросы застройщика
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="question-header">
+                <p>
+                  В базе: <strong>{questionLog.length}</strong> вопросов
+                </p>
+                <Button variant="secondary" size="sm" onClick={exportQuestions} disabled={!questionLog.length}>
+                  Экспорт JSON
+                </Button>
+              </div>
+
+              <div className="stats-line">
+                {Object.entries(intentStats).length ? (
+                  Object.entries(intentStats).map(([tag, count]) => (
+                    <Badge key={tag} variant="secondary">
+                      {tag}: {count}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="empty-state">Пока нет вопросов. Задайте их в чате справа.</span>
+                )}
+              </div>
+
+              <div className="question-list">
+                {questionLog.slice(0, 8).map((entry) => (
+                  <article key={entry.id} className="question-item">
+                    <p>{entry.text}</p>
+                    <div>
+                      <Badge variant="outline">{entry.tag}</Badge>
+                      <span>{formatDateTime(entry.createdAt)}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <aside className="chat-column">
+          <Card className="chat-card">
+            <CardHeader>
+              <CardTitle className="section-title">
+                <MessageSquareText size={18} />
+                ИИ-чат для диалога с застройщиком
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="chat-body">
+                {messages.map((message, index) => (
+                  <div key={index} className={`bubble ${message.role}`}>
+                    <div className="bubble-head">
+                      {message.role === "assistant" ? <Bot size={14} /> : <FileText size={14} />}
+                      <strong>{message.role === "assistant" ? "ИИ" : "Пользователь"}</strong>
+                    </div>
+                    <p>{message.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="chat-input-wrap">
+                <textarea
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  placeholder="Например: Как вы подключаетесь к 1С и CRM?"
+                  rows={3}
+                />
+                <Button onClick={onSend}>Отправить и сохранить вопрос</Button>
+              </div>
+
+              <p className="chat-note">
+                Каждый ваш вопрос автоматически сохраняется в накопитель идей и доступен для дальнейшего анализа.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent>
+              <p className="mini-title">
+                <BarChart3 size={16} /> Что дальше после демо
+              </p>
+              <ul className="next-steps">
+                <li>Пилот на одном проекте и одном блоке потерь</li>
+                <li>Подключение источников факта (фото/видео/датчики)</li>
+                <li>Dashboard для директора и руководителей направлений</li>
+              </ul>
+            </CardContent>
+          </Card>
+        </aside>
+      </main>
     </div>
   );
 }
